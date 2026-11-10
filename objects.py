@@ -24,6 +24,7 @@ from settings import (
     EXPLOSION_FRAMES,
     EXPLOSION_FRAME_TIME,
     EXPLOSION_SIZE,
+    SHIP_RADIUS,
 )
 
 
@@ -61,6 +62,7 @@ class Ship(SpaceObject):
         super().__init__((WIDTH / 2, HEIGHT / 2))
         self.angle = 0
         self.thrusting = False
+        self.radius = SHIP_RADIUS
 
     def update(self, keys, dt):
         """Обновляет поворот, скорость и положение корабля."""

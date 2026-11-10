@@ -13,6 +13,7 @@ from settings import (
     FONT_SIZE,
     HUD_MARGIN,
     TEXT_COLOR,
+    INITIAL_LIVES,
 )
 
 
@@ -33,6 +34,7 @@ class Game:
         self.score = 0
         self.font = pygame.font.Font(None, FONT_SIZE)
         self.explosions = []
+        self.lives = INITIAL_LIVES
 
     def check_missile_collisions(self):
         """Удаляет столкнувшиеся ракету и астероид, начисляет очко."""
@@ -46,6 +48,18 @@ class Game:
                     self.asteroids.remove(asteroid)
                     self.score += 1
                     break
+
+    def check_ship_collisions(self):
+        """Обрабатывает столкновение корабля с астероидом."""
+        for asteroid in self.asteroids[:]:
+            if self.ship.collides_with(asteroid):
+                self.explosions.append(
+                    Explosion(asteroid.position)
+                )
+                self.asteroids.remove(asteroid)
+                self.ship = Ship()
+                self.lives -= 1
+                break
 
     def run(self):
         """Обрабатывает события, движение и отрисовку."""
@@ -93,6 +107,8 @@ class Game:
             for asteroid in self.asteroids:
                 asteroid.draw(self.screen)
             self.check_missile_collisions()
+            if self.lives > 0:
+                self.check_ship_collisions()
             for explosion in self.explosions:
                 explosion.update(dt)
 
@@ -113,6 +129,14 @@ class Game:
                 f"Очки: {self.score}", True, TEXT_COLOR
             )
             self.screen.blit(score_text, (HUD_MARGIN, HUD_MARGIN))
+            lives_text = self.font.render(
+                f"Жизни: {self.lives}", True, TEXT_COLOR
+            )
+            lives_position = (
+                WIDTH - lives_text.get_width() - HUD_MARGIN,
+                HUD_MARGIN,
+            )
+            self.screen.blit(lives_text, lives_position)
             pygame.display.flip()
 
         pygame.quit()
