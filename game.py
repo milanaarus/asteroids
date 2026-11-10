@@ -1,9 +1,15 @@
 """Окно игры и основной игровой цикл."""
 
 import pygame
-from objects import Ship
+from objects import Missile, Ship
 
-from settings import BACKGROUND_COLOR, FPS, HEIGHT, WIDTH
+from settings import (
+    BACKGROUND_COLOR,
+    FPS,
+    HEIGHT,
+    SHIP_NOSE_OFFSET,
+    WIDTH,
+)
 
 
 class Game:
@@ -17,6 +23,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
         self.ship = Ship()
+        self.missiles = []
 
     def run(self):
         """Обрабатывает события, движение и отрисовку."""
@@ -27,11 +34,37 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.running = False
 
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        direction = pygame.Vector2(1, 0).rotate(
+                            self.ship.angle
+                        )
+                        nose = (
+                            self.ship.position
+                            + direction * SHIP_NOSE_OFFSET
+                        )
+                        self.missiles.append(
+                            Missile(nose, self.ship.angle)
+                        )
+
             keys = pygame.key.get_pressed()
             self.ship.update(keys, dt)
 
+            for missile in self.missiles:
+                missile.update(dt)
+
+            self.missiles = [
+                missile
+                for missile in self.missiles
+                if missile.time_left > 0
+            ]
+
             self.screen.fill(BACKGROUND_COLOR)
             self.ship.draw(self.screen)
+
+            for missile in self.missiles:
+                missile.draw(self.screen)
+
             pygame.display.flip()
 
         pygame.quit()

@@ -10,6 +10,10 @@ from settings import (
     SHIP_DRAG,
     SHIP_ROTATION_SPEED,
     WIDTH,
+    MISSILE_COLOR,
+    MISSILE_LIFETIME,
+    MISSILE_RADIUS,
+    MISSILE_SPEED,
 )
 
 
@@ -82,3 +86,27 @@ class Ship(SpaceObject):
             for point in points
         ]
         pygame.draw.polygon(screen, SHIP_COLOR, rotated_points, 2)
+
+
+class Missile(SpaceObject):
+    """Представляет ракету с ограниченным временем жизни."""
+
+    def __init__(self, position, angle):
+        """Создаёт ракету, летящую в заданном направлении."""
+        direction = pygame.Vector2(1, 0).rotate(angle)
+        super().__init__(position, direction * MISSILE_SPEED)
+        self.time_left = MISSILE_LIFETIME
+
+    def update(self, dt):
+        """Перемещает ракету и уменьшает время её жизни."""
+        self.move(dt)
+        self.time_left -= dt
+
+    def draw(self, screen):
+        """Рисует ракету."""
+        pygame.draw.circle(
+            screen,
+            MISSILE_COLOR,
+            self.position,
+            MISSILE_RADIUS,
+        )
