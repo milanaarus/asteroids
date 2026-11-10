@@ -74,3 +74,21 @@ INITIAL_LIVES = 3
 
 # Радиус корабля для проверки столкновений в пикселях.
 SHIP_RADIUS = 15
+
+# Размеры и цвет прямоугольника заставки.
+SPLASH_WIDTH = 400
+SPLASH_HEIGHT = 160
+SPLASH_COLOR = (35, 45, 70)
+
+# Параметры неподвижного звёздного фона.
+STAR_COUNT = 80
+STAR_COLOR = (150, 160, 190)
+
+# Параметры движущегося фонового слоя.
+BACKGROUND_ASTEROID_COUNT = 12
+BACKGROUND_ASTEROID_MIN_RADIUS = 20
+BACKGROUND_ASTEROID_MAX_RADIUS = 50
+BACKGROUND_SPEED = 20
+
+# Последнее число задаёт прозрачность: 0 — невидимый, 255 — непрозрачный.
+BACKGROUND_ASTEROID_COLOR = (100, 110, 140, 60)
