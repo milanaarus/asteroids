@@ -112,7 +112,7 @@ class Ship(SpaceObject):
             for point in SHIP_POINTS
         ]
         pygame.draw.polygon(
-            screen, ASTEROID_COLOR, rotated_points, OBJECT_LINE_WIDTH
+            screen, SHIP_COLOR, rotated_points, OBJECT_LINE_WIDTH
         )
 
 
@@ -188,7 +188,7 @@ class Asteroid(SpaceObject):
             for point in self.points
         ]
         pygame.draw.polygon(
-            screen, ASTEROID_COLOR, rotated_points, 2
+            screen, ASTEROID_COLOR, rotated_points, OBJECT_LINE_WIDTH
         )
 
 
