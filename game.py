@@ -1,7 +1,7 @@
 """Окно игры и основной игровой цикл."""
 
 import pygame
-from objects import Missile, Ship
+from objects import Asteroid, Explosion, Missile, Ship
 
 from settings import (
     BACKGROUND_COLOR,
@@ -9,6 +9,10 @@ from settings import (
     HEIGHT,
     SHIP_NOSE_OFFSET,
     WIDTH,
+    ASTEROID_INTERVAL,
+    FONT_SIZE,
+    HUD_MARGIN,
+    TEXT_COLOR,
 )
 
 
@@ -24,6 +28,24 @@ class Game:
         self.running = True
         self.ship = Ship()
         self.missiles = []
+        self.asteroids = []
+        self.asteroid_timer = 0
+        self.score = 0
+        self.font = pygame.font.Font(None, FONT_SIZE)
+        self.explosions = []
+
+    def check_missile_collisions(self):
+        """Удаляет столкнувшиеся ракету и астероид, начисляет очко."""
+        for missile in self.missiles[:]:
+            for asteroid in self.asteroids[:]:
+                if missile.collides_with(asteroid):
+                    self.explosions.append(
+                        Explosion(asteroid.position)
+                    )
+                    self.missiles.remove(missile)
+                    self.asteroids.remove(asteroid)
+                    self.score += 1
+                    break
 
     def run(self):
         """Обрабатывает события, движение и отрисовку."""
@@ -49,6 +71,14 @@ class Game:
 
             keys = pygame.key.get_pressed()
             self.ship.update(keys, dt)
+            self.asteroid_timer += dt
+
+            if self.asteroid_timer >= ASTEROID_INTERVAL:
+                self.asteroid_timer -= ASTEROID_INTERVAL
+                self.asteroids.append(Asteroid())
+
+            for asteroid in self.asteroids:
+                asteroid.update(dt)
 
             for missile in self.missiles:
                 missile.update(dt)
@@ -60,11 +90,29 @@ class Game:
             ]
 
             self.screen.fill(BACKGROUND_COLOR)
+            for asteroid in self.asteroids:
+                asteroid.draw(self.screen)
+            self.check_missile_collisions()
+            for explosion in self.explosions:
+                explosion.update(dt)
+
+            self.explosions = [
+                explosion
+                for explosion in self.explosions
+                if not explosion.is_finished()
+            ]
             self.ship.draw(self.screen)
 
             for missile in self.missiles:
                 missile.draw(self.screen)
 
+            for explosion in self.explosions:
+                explosion.draw(self.screen)
+
+            score_text = self.font.render(
+                f"Очки: {self.score}", True, TEXT_COLOR
+            )
+            self.screen.blit(score_text, (HUD_MARGIN, HUD_MARGIN))
             pygame.display.flip()
 
         pygame.quit()
