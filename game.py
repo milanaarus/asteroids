@@ -1,6 +1,7 @@
 """Окно игры и основной игровой цикл."""
 
 import pygame
+from objects import Ship
 
 from settings import BACKGROUND_COLOR, FPS, HEIGHT, WIDTH
 
@@ -15,16 +16,22 @@ class Game:
         pygame.display.set_caption("Астероиды")
         self.clock = pygame.time.Clock()
         self.running = True
+        self.ship = Ship()
 
     def run(self):
-        """Обрабатывает события и обновляет изображение."""
+        """Обрабатывает события, движение и отрисовку."""
         while self.running:
+            dt = self.clock.tick(FPS) / 1000
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
 
+            keys = pygame.key.get_pressed()
+            self.ship.update(keys, dt)
+
             self.screen.fill(BACKGROUND_COLOR)
+            self.ship.draw(self.screen)
             pygame.display.flip()
-            self.clock.tick(FPS)
 
         pygame.quit()
