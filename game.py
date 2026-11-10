@@ -1,9 +1,10 @@
 """Окно игры и основной игровой цикл."""
 
 import random
-import pygame
-from objects import Asteroid, Explosion, Missile, Ship
 
+import pygame
+
+from objects import Asteroid, Explosion, Missile, Ship
 from settings import (
     BACKGROUND_COLOR,
     FPS,
@@ -25,6 +26,10 @@ from settings import (
     BACKGROUND_SPEED,
     STAR_COLOR,
     STAR_COUNT,
+    SPLASH_TEXT_OFFSET,
+    STAR_RADIUS,
+    ASTEROID_VERTEX_STEP,
+    ASTEROID_MIN_RADIUS_RATIO,
 )
 
 
@@ -114,11 +119,15 @@ class Game:
         center_x, center_y = self.splash_rect.center
         self.screen.blit(
             title,
-            title.get_rect(center=(center_x, center_y - 25)),
+            title.get_rect(
+                center=(center_x, center_y - SPLASH_TEXT_OFFSET)
+            ),
         )
         self.screen.blit(
             hint,
-            hint.get_rect(center=(center_x, center_y + 25)),
+            hint.get_rect(
+                center=(center_x, center_y + SPLASH_TEXT_OFFSET)
+            ),
         )
 
     def create_background(self):
@@ -132,7 +141,10 @@ class Game:
                 random.randrange(HEIGHT),
             )
             pygame.draw.circle(
-                self.static_background, STAR_COLOR, position, 1
+                self.static_background,
+                STAR_COLOR,
+                position,
+                STAR_RADIUS,
             )
 
         self.moving_background = pygame.Surface(
@@ -150,9 +162,11 @@ class Game:
             )
             points = [
                 center + pygame.Vector2(
-                    radius * random.uniform(0.7, 1.0), 0
+                    radius
+                    * random.uniform(ASTEROID_MIN_RADIUS_RATIO, 1.0),
+                    0,
                 ).rotate(angle)
-                for angle in range(0, 360, 45)
+                for angle in range(0, 360, ASTEROID_VERTEX_STEP)
             ]
 
             # Копии у краёв позволяют слою двигаться без разрыва.

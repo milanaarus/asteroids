@@ -1,6 +1,7 @@
 """Классы игровых объектов."""
 
 import random
+
 import pygame
 
 from settings import (
@@ -25,6 +26,14 @@ from settings import (
     EXPLOSION_FRAME_TIME,
     EXPLOSION_SIZE,
     SHIP_RADIUS,
+    SHIP_POINTS,
+    FLAME_POINTS,
+    SHIP_STOP_SPEED,
+    OBJECT_LINE_WIDTH,
+    EXPLOSION_LINE_WIDTH,
+    EXPLOSION_PADDING,
+    ASTEROID_VERTEX_STEP,
+    ASTEROID_MIN_RADIUS_RATIO,
 )
 
 
@@ -80,7 +89,7 @@ class Ship(SpaceObject):
         else:
             self.velocity *= max(0, 1 - SHIP_DRAG * dt)
 
-            if self.velocity.length() < 1:
+            if self.velocity.length() < SHIP_STOP_SPEED:
                 self.velocity.update(0, 0)
 
         self.move(dt)
@@ -88,27 +97,23 @@ class Ship(SpaceObject):
     def draw(self, screen):
         """Рисует корабль и пламя при включённом двигателе."""
         if self.thrusting:
-            flame_points = [
-                pygame.Vector2(-15, -7),
-                pygame.Vector2(-30, 0),
-                pygame.Vector2(-15, 7),
-            ]
             rotated_flame = [
-                self.position + point.rotate(self.angle)
-                for point in flame_points
+                self.position
+                + pygame.Vector2(point).rotate(self.angle)
+                for point in FLAME_POINTS
             ]
-            pygame.draw.polygon(screen, FLAME_COLOR, rotated_flame)
+            pygame.draw.polygon(
+                screen, FLAME_COLOR, rotated_flame
+            )
 
-        points = [
-            pygame.Vector2(20, 0),
-            pygame.Vector2(-15, -12),
-            pygame.Vector2(-15, 12),
-        ]
         rotated_points = [
-            self.position + point.rotate(self.angle)
-            for point in points
+            self.position
+            + pygame.Vector2(point).rotate(self.angle)
+            for point in SHIP_POINTS
         ]
-        pygame.draw.polygon(screen, SHIP_COLOR, rotated_points, 2)
+        pygame.draw.polygon(
+            screen, ASTEROID_COLOR, rotated_points, OBJECT_LINE_WIDTH
+        )
 
 
 class Missile(SpaceObject):
@@ -164,9 +169,11 @@ class Asteroid(SpaceObject):
         # Разные расстояния от центра создают неровный контур.
         self.points = [
             pygame.Vector2(
-                self.radius * random.uniform(0.7, 1.0), 0
+                self.radius
+                * random.uniform(ASTEROID_MIN_RADIUS_RATIO, 1.0),
+                0,
             ).rotate(angle)
-            for angle in range(0, 360, 45)
+            for angle in range(0, 360, ASTEROID_VERTEX_STEP)
         ]
 
     def update(self, dt):
@@ -201,7 +208,9 @@ class Explosion:
         # Каждый кадр занимает отдельный квадрат в общей ленте.
         for frame in range(EXPLOSION_FRAMES):
             progress = (frame + 1) / EXPLOSION_FRAMES
-            radius = int((EXPLOSION_SIZE / 2 - 2) * progress)
+            radius = int(
+                (EXPLOSION_SIZE / 2 - EXPLOSION_PADDING) * progress
+            )
             alpha = int(255 * (1 - frame / EXPLOSION_FRAMES))
 
             center = (
@@ -213,7 +222,7 @@ class Explosion:
                 (*EXPLOSION_COLOR, alpha),
                 center,
                 radius,
-                3,
+                EXPLOSION_LINE_WIDTH,
             )
 
     def update(self, dt):
